@@ -8,23 +8,36 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		log.Println("Hey")
-		d, err := ioutil.ReadAll(r.Body)
+	http.HandleFunc(
+		"/",
+		func(rw http.ResponseWriter, r *http.Request) {
+			log.Println("Hey")
+			d, err := ioutil.ReadAll(r.Body)
 
-		if err != nil {
-			http.Error(rw, "some error", http.StatusBadRequest) // same stuff
-			// rw.WriteHeader(http.StatusBadRequest)
-			// rw.Write([]byte("Some error"))
-			return
-		}
+			if err != nil {
+				http.Error(
+					rw,
+					"some error",
+					http.StatusBadRequest,
+				)
 
-		fmt.Fprintf(rw, "Your data %s", d)
-	})
+				// Same as above
+				// rw.WriteHeader(http.StatusBadRequest)
+				// rw.Write([]byte("Some error"))
 
-	http.HandleFunc("/goodbye", func(http.ResponseWriter, *http.Request) {
-		log.Println("Bye")
-	})
+				return
+			}
+
+			fmt.Fprintf(rw, "Your data %s", d)
+		},
+	)
+
+	http.HandleFunc(
+		"/goodbye",
+		func(http.ResponseWriter, *http.Request) {
+			log.Println("Bye")
+		},
+	)
 
 	http.ListenAndServe(":9090", nil)
 }
