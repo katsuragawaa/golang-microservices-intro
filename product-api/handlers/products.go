@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"microservices-youtube/product-api/data"
 	"net/http"
@@ -17,13 +16,8 @@ func NewProducts(l *log.Logger) *Products {
 
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	products := data.GetProducts()
-	productsJson, err := json.Marshal(products)
+	err := products.ToJSON(rw)
 	if err != nil {
-		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
-	}
-
-	_, writeError := rw.Write(productsJson)
-	if writeError == nil {
-		http.Error(rw, "Failed to write response", http.StatusInternalServerError)
+		http.Error(rw, "Unable to encode json", http.StatusInternalServerError)
 	}
 }
