@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"golang-microservices-intro/product-api/handlers"
 	"log"
-	"microservices-youtube/product-api/handlers"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,7 +13,6 @@ import (
 func main() {
 	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
 	productHandler := handlers.NewProducts(logger)
-
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/", productHandler)
 

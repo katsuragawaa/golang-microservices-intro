@@ -1,3 +1,3 @@
-module microservices-youtube
+module golang-microservices-intro
 
 go 1.18

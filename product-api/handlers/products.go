@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"golang-microservices-intro/product-api/data"
 	"log"
-	"microservices-youtube/product-api/data"
 	"net/http"
 )
 
