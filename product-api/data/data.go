@@ -20,6 +20,11 @@ type Product struct {
 
 type Products []*Product
 
+// ToJSON serializes the contents of the collection to JSON
+// NewEncoder provides better performance than json.UnMarshal as it does not
+// have to buffer the output into an in-memory slice of bytes
+//
+// https://pkg.go.dev/encoding/base64@go1.18#NewEncoder
 func (p *Products) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
