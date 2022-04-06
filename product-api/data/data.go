@@ -18,10 +18,15 @@ type Product struct {
 	DeletedOn   string  `json:"-"`
 }
 
+func (p *Product) FromJSON(r io.Reader) error {
+	e := json.NewDecoder(r)
+	return e.Decode(p)
+}
+
 type Products []*Product
 
 // ToJSON serializes the contents of the collection to JSON
-// NewEncoder provides better performance than json.UnMarshal as it does not
+// NewEncoder provides better performance than json.Marshal as it does not
 // have to buffer the output into an in-memory slice of bytes
 //
 // https://pkg.go.dev/encoding/base64@go1.18#NewEncoder
@@ -32,6 +37,16 @@ func (p *Products) ToJSON(w io.Writer) error {
 
 func GetProducts() Products {
 	return productList
+}
+
+func AddProduct(p *Product) {
+	p.ID = getNextId()
+	productList = append(productList, p)
+}
+
+func getNextId() int {
+	lastProduct := productList[len(productList)-1]
+	return lastProduct.ID + 1
 }
 
 var productList = []*Product{

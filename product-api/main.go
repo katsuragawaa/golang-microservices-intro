@@ -38,6 +38,9 @@ func main() {
 	sig := <-signalChannel
 	logger.Println("Received  terminal, graceful shutdown ::", sig)
 
-	timeoutContext, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	timeoutContext, _ := context.WithTimeout(
+		context.Background(),
+		30*time.Second,
+	)
 	server.Shutdown(timeoutContext)
 }
