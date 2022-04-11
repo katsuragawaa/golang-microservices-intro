@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"github.com/gorilla/mux"
 	"golang-microservices-intro/product-api/data"
 	"log"
@@ -27,17 +28,14 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle POST Product")
 
-	product := &data.Product{}
-	err := product.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Unable do decode json", http.StatusBadRequest)
-	}
+	product := r.Context().Value(KeyProduct{}).(data.Product)
 
-	data.AddProduct(product)
+	data.AddProduct(&product)
 }
 
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(rw, "Unable to convert id", http.StatusBadRequest)
@@ -45,20 +43,36 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	p.logger.Println("Handle PUT Product", id)
 
-	product := &data.Product{}
-	err = product.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Unable do decode json", http.StatusBadRequest)
-	}
+	product := r.Context().Value(KeyProduct{}).(data.Product)
 
-	err = data.UpdateProduct(id, product)
+	err = data.UpdateProduct(id, &product)
 	if err == data.ErrProductNotFound {
 		http.Error(rw, "Product not found", http.StatusNotFound)
 		return
 	}
-
 	if err != nil {
 		http.Error(rw, "Product not found", http.StatusInternalServerError)
 		return
 	}
+}
+
+type KeyProduct struct{}
+
+func (p Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(rw http.ResponseWriter, r *http.Request) {
+			product := data.Product{}
+
+			err := product.FromJSON(r.Body)
+			if err != nil {
+				http.Error(rw, "Unable do decode json", http.StatusBadRequest)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), KeyProduct{}, product)
+			r = r.WithContext(ctx)
+
+			next.ServeHTTP(rw, r)
+		},
+	)
 }
