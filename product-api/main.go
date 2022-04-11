@@ -24,6 +24,9 @@ func main() {
 	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
 
+	postRouter := serveMux.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", productHandler.AddProduct)
+
 	server := &http.Server{
 		Addr:         ":9090",
 		Handler:      serveMux,
