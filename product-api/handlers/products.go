@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"github.com/gorilla/mux"
 	"golang-microservices-intro/product-api/data"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 )
 
@@ -16,52 +16,14 @@ func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
 }
 
-func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		p.getProducts(rw, r)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		p.addProduct(rw, r)
-		return
-	}
-
-	if r.Method == http.MethodPut {
-		regex := regexp.MustCompile(`/([0-9]+)`)
-		path := r.URL.Path
-		p.logger.Println("PUT", path)
-
-		match := regex.FindAllStringSubmatch(path, -1)
-		p.logger.Printf("Matched group: %v", match)
-
-		if len(match) != 1 || len(match[0]) != 2 {
-			http.Error(rw, "Invalid URI", http.StatusBadRequest)
-			return
-		}
-
-		idString := match[0][1]
-		id, err := strconv.Atoi(idString)
-		if err != nil {
-			http.Error(rw, "Invalid URI", http.StatusBadRequest)
-			return
-		}
-
-		p.updateProduct(id, rw, r)
-		return
-	}
-
-	// Catch all
-	rw.WriteHeader(http.StatusMethodNotAllowed)
-}
-
-func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	products := data.GetProducts()
 	err := products.ToJSON(rw)
 	if err != nil {
 		http.Error(rw, "Unable to encode json", http.StatusInternalServerError)
 	}
 }
+
 func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle POST Product")
 
@@ -74,11 +36,17 @@ func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
 	data.AddProduct(product)
 }
 
-func (p *Products) updateProduct(id int, rw http.ResponseWriter, r *http.Request) {
-	p.logger.Println("Handle PUT Product")
+func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(rw, "Unable to convert id", http.StatusBadRequest)
+	}
+
+	p.logger.Println("Handle PUT Product", id)
 
 	product := &data.Product{}
-	err := product.FromJSON(r.Body)
+	err = product.FromJSON(r.Body)
 	if err != nil {
 		http.Error(rw, "Unable do decode json", http.StatusBadRequest)
 	}
