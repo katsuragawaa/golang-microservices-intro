@@ -19,7 +19,6 @@ func main() {
 	serveMux := mux.NewRouter()
 	getRouter := serveMux.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", productHandler.GetProducts)
-	// serveMux.Handle("/product", productHandler)
 
 	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
