@@ -25,7 +25,10 @@ type Products []*Product
 
 func (p *Product) Validate() error {
 	validate := validator.New()
-	validate.RegisterValidation("sku", validateSKU)
+	err := validate.RegisterValidation("sku", validateSKU)
+	if err != nil {
+		return fmt.Errorf("unable to validate SKU")
+	}
 	return validate.Struct(p)
 }
 
