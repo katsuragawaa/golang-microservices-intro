@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"github.com/gorilla/mux"
 	"golang-microservices-intro/product-api/data"
 	"log"
@@ -65,7 +66,15 @@ func (p Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
 
 			err := product.FromJSON(r.Body)
 			if err != nil {
-				http.Error(rw, "Unable do decode json", http.StatusBadRequest)
+				p.logger.Println("[ERROR] deserializing product")
+				http.Error(rw, "Error reading product", http.StatusBadRequest)
+				return
+			}
+
+			err = product.Validate()
+			if err != nil {
+				p.logger.Println("[ERROR] validating product", err)
+				http.Error(rw, fmt.Sprintf("Error validating product: %s", err), http.StatusBadRequest)
 				return
 			}
 

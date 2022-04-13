@@ -36,13 +36,12 @@ func validateSKU(fl validator.FieldLevel) bool {
 	// SKU is of format abc-defg-hijkl
 	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
 	matches := re.FindAllString(fl.Field().String(), -1)
-
 	return len(matches) == 1
 }
 
 func (p *Product) FromJSON(r io.Reader) error {
-	e := json.NewDecoder(r)
-	return e.Decode(p)
+	d := json.NewDecoder(r)
+	return d.Decode(p)
 }
 
 // ToJSON serializes the contents of the collection to JSON
